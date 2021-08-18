@@ -63,15 +63,18 @@ RUN curl -s https://getcomposer.org/installer | php -- --install-dir=/usr/local/
 ARG uid
 RUN useradd -G www-data,root -u 1000 -d /home/devuser devuser && \
     mkdir -p /home/devuser/.composer && \
-    chown -R devuser:devuser /home/devuser && \
-    cd /var/www/html && wget https://github.com/prosanteconnect/psc-ws-maj/archive/$version.tar.gz && \
-    tar -xzf $version.tar.gz --strip 1 && rm $version.tar.gz
+    chown -R devuser:devuser /home/devuser
+#cd /var/www/html && wget https://github.com/prosanteconnect/psc-ws-maj/archive/$version.tar.gz && \
+#tar -xzf $version.tar.gz --strip 1 && rm $version.tar.gz
+
+COPY . /var/www/html/
 
 # Setup working directory
 WORKDIR /var/www/html
 
 # Install dependencies, run npm, patch apache start script to reload php config
-RUN composer update && \
+RUN cd /var/www/html && \
+    composer update && \
     composer install --optimize-autoloader --no-dev && \
     npm install && \
     touch /var/www/html/.env && echo "APP_KEY=" > .env && php artisan key:generate && \
