@@ -1,8 +1,9 @@
 job "psc-ws-maj" {
     datacenters = ["dc1"]
     type = "service"
+
     vault {
-        policies = ["psc-ecosystem", "rabbitmq"]
+        policies = ["psc-ecosystem"]
         change_mode = "restart"
     }
     group "psc-ws-maj" {
@@ -59,23 +60,23 @@ EOH
                     API_URL="http://{{ range service "psc-api-maj" }}{{ .Address }}:{{ .Port }}{{ end }}/api"
                     IN_RASS_URL="https://in.api.test.henix.asipsante.fr/api/lura/ing/rass/users"
 
-                    PROXY_URL="https://psc-ws-maj.test.psc.api.esante.gouv.fr"
+                    PROXY_URL="https://psc-ws-maj.psc.api.esante.gouv.fr"
                     PROXY_SCHEMA=https
 
                     LOG_CHANNEL=errorlog
                     LOG_LEVEL=info
 
-                    RABBITMQ_HOST={{ range service "rabbitmq" }}{{ .Address }}{{ end }}
-                    RABBITMQ_PORT={{ range service "rabbitmq" }}{{ .Port }}{{ end }}
-                    RABBITMQ_USER="{{ with secret "components/rabbitmq/authentication" }}{{ .Data.data.user }}{{ end }}"
-                    RABBITMQ_PASSWORD="{{ with secret "components/rabbitmq/authentication" }}{{ .Data.data.password }}{{ end }}"
+                    RABBITMQ_HOST={{ range service "psc-rabbitmq" }}{{ .Address }}{{ end }}
+                    RABBITMQ_PORT={{ range service "psc-rabbitmq" }}{{ .Port }}{{ end }}
+                    RABBITMQ_USER="{{ with secret "psc-ecosystem/rabbitmq" }}{{ .Data.data.user }}{{ end }}"
+                    RABBITMQ_PASSWORD="{{ with secret "psc-ecosystem/rabbitmq" }}{{ .Data.data.password }}{{ end }}"
 
                     SESSION_DRIVER=cookie
                     SESSION_LIFETIME=10
 
                     PROSANTECONNECT_CLIENT_ID={{ with secret "psc-ecosystem/psc-ws-maj" }}{{ .Data.data.psc_client_id }}{{ end }}
                     PROSANTECONNECT_CLIENT_SECRET={{ with secret "psc-ecosystem/psc-ws-maj" }}{{ .Data.data.psc_client_secret }}{{ end }}
-                    PROSANTECONNECT_REDIRECT_URI="https://psc-ws-maj.test.psc.api.esante.gouv.fr/ui/auth/prosanteconnect/callback"
+                    PROSANTECONNECT_REDIRECT_URI="https://psc-ws-maj.psc.api.esante.gouv.fr/ui/auth/prosanteconnect/callback"
                     PUBLIC_KEY_FILE=/secrets/public_key.pem
                 EOH
                 destination = "secrets/.env"
